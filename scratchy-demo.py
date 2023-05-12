@@ -11,7 +11,7 @@ from nltk import tokenize
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import pipeline
 
-title = 'a sentimental scraper'
+title = '>>> a sentimental scraper <<<'
 
 def get_args():
     parser = argparse.ArgumentParser(description=title)
@@ -46,8 +46,7 @@ def text_from_html(search_req):
     return u" ".join(t.strip() for t in visible_texts)
 
 
-def getNewsData(query):
-    num_results = 5
+def getNewsData(query, num_results=10):
     search_req = "https://www.google.com/search?q="+query+"&gl=us&tbm=nws&num="+str(num_results)+""
     response = requests.get(search_req, headers=headers)
     soup = BeautifulSoup(response.content, "html.parser")
@@ -74,13 +73,14 @@ def getNewsData(query):
                 "sentiment": sum/(len(sentiment)-neutrals),
             }
         )
- 
-    print("you searched for:", search_req)
-    print("News Results:")
-    print(json.dumps(news_results, indent=2))
+
+    return news_results, search_req
 
 
 if __name__ == "__main__":
     args = get_args() # all input arguments
     print(title)
-    getNewsData(args.i)
+    news_results, search_req = getNewsData(args.i, num_results=10)
+    print("You searched for:", args.i, "with:", search_req)
+    print("News Results:")
+    print(json.dumps(news_results, indent=2))
