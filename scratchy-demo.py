@@ -1,7 +1,8 @@
-
-# https://serpdog.io/blog/web-scraping-google-news-using-python/
+# E. Culurciello
+# May 2023
 
 import json
+import argparse
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -9,6 +10,15 @@ from bs4.element import Comment
 from nltk import tokenize
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import pipeline
+
+title = 'a sentimental scraper'
+
+def get_args():
+    parser = argparse.ArgumentParser(description=title)
+    arg = parser.add_argument
+    arg('--i', type=str, default="nvidia",  help='search text')
+    args = parser.parse_args()
+    return args
 
 
 finbert = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone', num_labels=3)
@@ -36,8 +46,7 @@ def text_from_html(search_req):
     return u" ".join(t.strip() for t in visible_texts)
 
 
-def getNewsData():
-    query = "nvidia"
+def getNewsData(query):
     num_results = 5
     search_req = "https://www.google.com/search?q="+query+"&gl=us&tbm=nws&num="+str(num_results)+""
     response = requests.get(search_req, headers=headers)
@@ -47,7 +56,7 @@ def getNewsData():
     for el in soup.select("div.SoaBEf"):
         text = text_from_html(el.find("a")["href"])
         sentences = tokenize.sent_tokenize(text)
-        sentiment = nlp(sentences) #LABEL_0: neutral; LABEL_1: positive; LABEL_2: negative
+        sentiment = nlp(sentences)
         sum = 0
         neutrals = 0
         for r in sentiment: 
@@ -70,9 +79,8 @@ def getNewsData():
     print("News Results:")
     print(json.dumps(news_results, indent=2))
 
-getNewsData()
 
-
-# get text:
-# search_req = 'http://www.nytimes.com/2009/12/21/us/21storm.html'
-# print(text_from_html(search_req))
+if __name__ == "__main__":
+    args = get_args() # all input arguments
+    print(title)
+    getNewsData(args.i)
