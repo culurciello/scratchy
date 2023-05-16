@@ -52,13 +52,13 @@ headers = {
     }
 
 
-def getNewsData(query, num_results=10):
+def getNewsData(query, num_results=10, truncate=1500):
     search_req = "https://www.google.com/search?q="+query+"&gl=us&tbm=nws&num="+str(num_results)+""
     print(bcolors.OKGREEN + "ANALYZING:", search_req, "..."+bcolors.ENDC)
-    response = requests.get(search_req, headers=headers)
     news_results = []
-
-    # get webpage 
+    
+    # get webpage content
+    response = requests.get(search_req, headers=headers)
     soup = BeautifulSoup(response.content, "html.parser")
 
     for el in soup.select("div.SoaBEf"):
@@ -67,6 +67,11 @@ def getNewsData(query, num_results=10):
         html_text = trafilatura.extract(downloaded)
         if html_text:
             sentences = tokenize.sent_tokenize(html_text)
+            # truncate sentences that are too long
+            for i,s in enumerate(sentences):
+                if len(s)>truncate:
+                    sentences[i]=sentences[i][:truncate]
+
             sentiment = sentiment_analyzer(sentences)
             sum = 0
             neutrals = 0
