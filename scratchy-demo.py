@@ -52,7 +52,7 @@ headers = {
     }
 
 
-def getNewsData(query, num_results=10, truncate=1500):
+def getNewsData(query, num_results=10, max_length=1500):
     search_req = "https://www.google.com/search?q="+query+"&gl=us&tbm=nws&num="+str(num_results)+""
     print(bcolors.OKGREEN + "ANALYZING:", search_req, "..."+bcolors.ENDC)
     news_results = []
@@ -69,8 +69,8 @@ def getNewsData(query, num_results=10, truncate=1500):
             sentences = tokenize.sent_tokenize(html_text)
             # truncate sentences that are too long
             for i,s in enumerate(sentences):
-                if len(s)>truncate:
-                    sentences[i]=sentences[i][:truncate]
+                if len(s)>max_length:
+                    sentences[i]=sentences[i][:max_length]
 
             sentiment = sentiment_analyzer(sentences)
             sum = 0
@@ -90,7 +90,7 @@ def getNewsData(query, num_results=10, truncate=1500):
                         "snippet": el.select_one(".GI74Re").get_text(),
                         "date": el.select_one(".LfVVr").get_text(),
                         "source": el.select_one(".NUnG9d span").get_text(),
-                        # "text": text,
+                        # "text": html_text,
                         "sentiment": sentiment,
                     }
                 )
