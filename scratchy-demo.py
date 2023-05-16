@@ -65,29 +65,30 @@ def getNewsData(query, num_results=10):
         sublink = el.find("a")["href"]
         downloaded = trafilatura.fetch_url(sublink)
         html_text = trafilatura.extract(downloaded)
-        sentences = tokenize.sent_tokenize(html_text)
-        sentiment = sentiment_analyzer(sentences)
-        sum = 0
-        neutrals = 0
-        if len(sentiment) > 0:
-            for r in sentiment: 
-                sum += (r["label"] == "Positive")
-                neutrals += (r["label"] == "Neutral")
+        if html_text:
+            sentences = tokenize.sent_tokenize(html_text)
+            sentiment = sentiment_analyzer(sentences)
+            sum = 0
+            neutrals = 0
+            if len(sentiment) > 0:
+                for r in sentiment: 
+                    sum += (r["label"] == "Positive")
+                    neutrals += (r["label"] == "Neutral")
 
-            den = len(sentiment)-neutrals
-            sentiment = sum/den if den > 0 else 1.0 # as all neutral
+                den = len(sentiment)-neutrals
+                sentiment = sum/den if den > 0 else 1.0 # as all neutral
 
-            news_results.append(
-                {
-                    "link": el.find("a")["href"],
-                    "title": el.select_one("div.MBeuO").get_text(),
-                    "snippet": el.select_one(".GI74Re").get_text(),
-                    "date": el.select_one(".LfVVr").get_text(),
-                    "source": el.select_one(".NUnG9d span").get_text(),
-                    # "text": text,
-                    "sentiment": sentiment,
-                }
-            )
+                news_results.append(
+                    {
+                        "link": el.find("a")["href"],
+                        "title": el.select_one("div.MBeuO").get_text(),
+                        "snippet": el.select_one(".GI74Re").get_text(),
+                        "date": el.select_one(".LfVVr").get_text(),
+                        "source": el.select_one(".NUnG9d span").get_text(),
+                        # "text": text,
+                        "sentiment": sentiment,
+                    }
+                )
 
     return news_results, search_req
 
